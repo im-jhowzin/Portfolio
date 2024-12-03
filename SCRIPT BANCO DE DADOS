@@ -1,0 +1,107 @@
+CREATE DATABASE faculdade;
+USE faculdade;
+
+CREATE TABLE tbl_alunos (
+    id_alunos INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),
+    email VARCHAR(100),
+    data_nascimento DATE,
+    matricula INT UNIQUE,
+    id_curso INT,
+    FOREIGN KEY (id_curso) REFERENCES tbl_curso(id_curso)
+);
+
+CREATE TABLE tbl_curso (
+    id_curso INT AUTO_INCREMENT PRIMARY KEY,
+    nome_curso VARCHAR(100),
+    duracao INT
+);
+
+CREATE TABLE tbl_professores (
+    id_professores INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),
+    email VARCHAR(100),
+    data_contratacao DATE
+);
+
+CREATE TABLE tbl_disciplinas (
+    id_disciplinas INT AUTO_INCREMENT PRIMARY KEY,
+    nome_disciplinas VARCHAR(100),
+    id_curso INT,
+    id_professor INT,
+    FOREIGN KEY (id_curso) REFERENCES tbl_curso(id_curso),
+    FOREIGN KEY (id_professor) REFERENCES tbl_professores(id_professores)
+);
+
+CREATE TABLE tbl_turmas (
+    id_turmas INT AUTO_INCREMENT PRIMARY KEY,
+    id_disciplinas INT,
+    ano YEAR,
+    semestre TINYINT,
+    FOREIGN KEY (id_disciplinas) REFERENCES tbl_disciplinas(id_disciplinas)
+);
+
+CREATE TABLE tbl_alunos_turmas (
+    id_tbl_alunos_turmas INT AUTO_INCREMENT PRIMARY KEY,
+    id_alunos INT,
+    id_turmas INT,
+    FOREIGN KEY (id_alunos) REFERENCES tbl_alunos(id_alunos),
+    FOREIGN KEY (id_turmas) REFERENCES tbl_turmas(id_turmas)
+);
+
+CREATE TABLE tbl_notas (
+    id_nota INT AUTO_INCREMENT PRIMARY KEY,
+    id_alunos INT,
+    id_disciplinas INT,
+    nota DECIMAL(5, 2),
+    data_lancamento DATE,
+    FOREIGN KEY (id_alunos) REFERENCES tbl_alunos(id_alunos),
+    FOREIGN KEY (id_disciplinas) REFERENCES tbl_disciplinas(id_disciplinas)
+);
+
+INSERT INTO tbl_curso (nome_curso, duracao) VALUES 
+('Engenharia de Software', 8),
+('Administração', 4),
+('Direito', 5);
+
+INSERT INTO tbl_professores (nome, email, data_contratacao) VALUES 
+('Maria Silva', 'maria.silva@faculdade.com', '2020-01-15'),
+('João Souza', 'joao.souza@faculdade.com', '2019-03-10');
+
+INSERT INTO tbl_disciplinas (nome_disciplinas, id_curso, id_professor) VALUES 
+('Algoritmos', 1, 1),
+('Matemática Financeira', 2, 2),
+('Direito Penal', 3, 2);
+
+INSERT INTO tbl_alunos (nome, email, data_nascimento, matricula, id_curso) VALUES 
+('Carlos Andrade', 'carlos.andrade@faculdade.com', '2000-05-20', 12345, 1),
+('Ana Paula', 'ana.paula@faculdade.com', '1999-09-10', 12346, 2);
+
+
+INSERT INTO tbl_turmas (id_disciplinas, ano, semestre) VALUES 
+(1, 2023, 1),
+(2, 2023, 2);
+
+INSERT INTO tbl_alunos_turmas (id_alunos, id_turmas) VALUES 
+(1, 1),
+(2, 2);
+
+INSERT INTO tbl_notas (id_alunos, id_disciplinas, nota, data_lancamento) VALUES 
+(1, 1, 8.5, '2023-06-30'),
+(2, 2, 7.0, '2023-07-15');
+
+SELECT a.nome AS aluno, t.ano, t.semestre, d.nome_disciplinas AS disciplina
+FROM tbl_alunos_turmas at
+JOIN tbl_alunos a ON at.id_alunos = a.id_alunos
+JOIN tbl_turmas t ON at.id_turmas = t.id_turmas
+JOIN tbl_disciplinas d ON t.id_disciplinas = d.id_disciplinas;
+
+SELECT a.nome AS aluno, d.nome_disciplinas AS disciplina, n.nota, n.data_lancamento
+FROM tbl_notas n
+JOIN tbl_alunos a ON n.id_alunos = a.id_alunos
+JOIN tbl_disciplinas d ON n.id_disciplinas = d.id_disciplinas;
+
+SELECT c.nome_curso, d.nome_disciplinas, p.nome AS professor
+FROM tbl_disciplinas d
+JOIN tbl_curso c ON d.id_curso = c.id_curso
+JOIN tbl_professores p ON d.id_professor = p.id_professores;
